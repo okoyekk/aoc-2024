@@ -1,5 +1,13 @@
-import pprint
 from collections import defaultdict
+import sys
+import os
+
+# Get the absolute path of the project root (folder A)
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, project_root)
+
+from debug import Debug  # noqa: E402
+dbg = Debug(False)
 
 
 def load_input():
@@ -33,21 +41,21 @@ def get_valid_update_indices(rules: dict[int, set[int]],
     valid_updates = []
     for i, update in enumerate(updates):
         is_update_invalid = False
-        print("************")
-        print("update:", update)
-        print("------------")
+        dbg.print("************")
+        dbg.print("update:", update)
+        dbg.print("------------")
         for j, page in enumerate(update):
             if not is_update_invalid:
-                print("page:", page)
+                dbg.print("page:", page)
                 deps = rules[page]
-                print("deps:", deps)
+                dbg.print("deps:", deps)
                 for x in deps:
                     # update is only valid if all dependencies of each page 
                     # come before it
-                    print("x:", x)
-                    print("update[:j]:", update[:j])
+                    dbg.print("x:", x)
+                    dbg.print("update[:j]:", update[:j])
                     if (x in update) and (x not in update[:j]):
-                        print("invalid!")
+                        dbg.print("invalid!")
                         is_update_invalid = True
                         break
             else:
@@ -63,17 +71,23 @@ def get_middle_page(updates: list[int]) -> int:
 
 def main():
     data = load_input()
-    pprint.pp(data)
+    dbg.pp(data)
     rules = data[0]
     updates = data[1]
 
-    valid = get_valid_update_indices(rules, updates)
-    # print("==========")
-    # pprint.pp(valid)
+    valid_indices = get_valid_update_indices(rules, updates)
+    dbg.print("==========")
+    dbg.pp(valid_indices)
     res = 0
-    for i in valid:
+    for i in valid_indices:
         res += get_middle_page(updates[i])
-    print(res)
+
+    print("result:", res)
+    
+    # Reorder invalid updates
+    invalid_updates = [updates[i] for i in range(len(updates)) 
+                       if i not in valid_indices]
+    print(invalid_updates)
 
 
 if __name__ == '__main__':
